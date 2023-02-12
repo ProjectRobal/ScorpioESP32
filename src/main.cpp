@@ -3,16 +3,26 @@
 #include <soc/sens_reg.h>
 #include <soc/sens_struct.h>
 
-#include "driver/adc.h"
-#include "esp_adc_cal.h"
-
-#include <sys/param.h>
+#include <esp_types.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
 #include "sdkconfig.h"
-#include "hal/assert.h"
-#include "soc/lldesc.h"
-#include "soc/soc_caps.h"
-#include "hal/adc_ll.h"
+#include "esp_intr_alloc.h"
+#include "esp_log.h"
+#include "esp_pm.h"
+#include "esp_check.h"
+#include "sys/lock.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
+#include "freertos/timers.h"
+#include "freertos/ringbuf.h"
+#include "driver/periph_ctrl.h"
+#include "driver/gpio.h"
+#include "driver/adc.h"
 #include "hal/adc_types.h"
+#include "hal/adc_hal.h"
+#include "hal/dma_types.h"
 
 #define CH0 1 // ADC1 CH0
 #define CH1 4 // ADC1 CH3
@@ -40,29 +50,42 @@ int IRAM_ATTR local_adc1_read(int channel) {
     return adc_value;
 }
 
-void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(115200);
+volatile uint64_t start=0;
 
+volatile uint64_t end=0;
+
+
+extern "C" void app_main()
+{
+  #ifdef F_CPU
+    setCpuFrequencyMhz(F_CPU/1000000);
+  #endif
+
+  #if CONFIG_SPIRAM_SUPPORT || CONFIG_SPIRAM
+    psramInit();
+  #endif
+
+  Serial.begin(115200);
 
   adc1_config_width(ADC_WIDTH_BIT_10);
 
   adc1_config_channel_atten((adc1_channel_t)CH0,ADC_ATTEN_DB_2_5);
 
-}
+  periph_module_enable(PERIPH_SARADC_MODULE);
+  adc_power_acquire();
 
-volatile uint64_t start=0;
-
-volatile uint64_t end=0;
-
-void loop() {
-  // put your main code here, to run repeatedly:
+  while(1)
+  {
   Serial.println("Starting sampling: ");
   start=micros();
-  Serial.println(adc1_get_raw((adc1_channel_t)CH0));
+  int32_t output;
+  adc_hal_convert(adc_ll_num_t::ADC_NUM_1,CH0,&output);
+  Serial.println(output);
   end=micros();
+
 
   Serial.print(end-start);
   Serial.println(" us");
+  }
 
 }

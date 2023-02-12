@@ -28,7 +28,7 @@ uint16_t Sampler::count_channels(uint16_t mask)
 
 void Sampler::_init_adc_dma(const uint32_t& buffer_size,const uint32_t& max_buffer_size)
     {
-        adc_digi_init_config_s config;
+        
         config.max_store_buf_size=max_buffer_size;
         config.conv_num_each_intr=buffer_size;
         config.adc1_chan_mask=adc1_channels;
@@ -37,6 +37,29 @@ void Sampler::_init_adc_dma(const uint32_t& buffer_size,const uint32_t& max_buff
         adc_digi_initialize(&config);
         _init_buffer(buffer_size);
     }
+
+void Sampler::_init_adc_channel(const ADCOutput& adc)
+{
+        config.adc1_chan_mask=0;
+        config.adc2_chan_mask=0;
+
+        switch(adc.unit)
+        {
+            case ADC1:
+
+            config.adc1_chan_mask=(1<<adc.channel);
+
+            break;
+
+            case ADC2:
+
+            config.adc2_chan_mask=(1<<adc.channel);
+
+            break;
+        }
+
+        adc_digi_initialize(&config);
+}
 
 void Sampler::_init_adc_controller_cfg()
 {
@@ -212,9 +235,32 @@ Sampler::Sampler()
         adc_mode=ADC_CONV_SINGLE_UNIT_1;
     }
 
+void Sampler::round_robin(ADCOutput* _output,const uint32_t& _adcs)
+{
+    uint32_t readed=0;
+
+    for(uint8_t a=0;a<_adcs;++a)
+    {
+        _init_adc_channel(_output[a]);
+
+        adc_digi_read_bytes(buffer_out,buffer_size,&readed,TIMEOUT);
+
+    for(uint32_t i=0;i<readed;i+=ADC_RESULT_BYTE)
+    {
+        adc_digi_output_data_t *p = (adc_digi_output_data_t*)&buffer_out[i];
+
+            #if ADC_CONV_MODE==ADC_DIGI_OUTPUT_FORMAT_TYPE1
+            _output[a].AppendData(p->type1.data,p->type1.channel,0);
+            #else
+            _output[a].AppendData(p->type2.data,p->type2.channel,p->type2.unit);
+            #endif
+    }
+    }
+}
 
 void Sampler::parse_data(ADCOutput* _output,const uint32_t& _adcs)
     {
+    
     uint32_t readed=0;
     adc_digi_read_bytes(buffer_out,buffer_size,&readed,TIMEOUT);
     uint8_t a;

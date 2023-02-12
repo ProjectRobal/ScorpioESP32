@@ -37,8 +37,8 @@ class Sampler;
 
 enum ADC_DEVICE
 {
-    ADC1,
-    ADC2
+    ADC1=0,
+    ADC2=1
 };
 
 class ADCOutput
@@ -53,17 +53,26 @@ class ADCOutput
 
     uint32_t _size;
 
-    uint8_t unit;
+    ADC_DEVICE unit;
 
     public:
 
-    ADCOutput(uint8_t _channel,uint32_t size,uint8_t _unit=0)
+    ADCOutput(uint8_t _channel,uint32_t size,ADC_DEVICE _unit=ADC_DEVICE::ADC1)
     {
         channel=_channel;
         _size=size;
         unit=_unit;
         ptr=0;
+
+        #ifdef BOARD_HAS_PSRAM
+
+        data=(uint16_t*)ps_malloc(size*sizeof(uint16_t));
+
+        #else
+
         data=new uint16_t[size];
+
+        #endif
     }
 
     const uint32_t& Size()
@@ -110,6 +119,8 @@ class Sampler
 
     adc_digi_convert_mode_t adc_mode;
 
+    adc_digi_init_config_s config;
+
     uint32_t sample_freq;
 
     uint8_t *buffer_out;
@@ -128,6 +139,8 @@ class Sampler
 
     void _init_adc_dma(const uint32_t& buffer_size,const uint32_t& max_buffer_size);
 
+    void _init_adc_channel(const ADCOutput& adc);
+
     void _init_adc_controller_cfg();
 
     void _init_buffer(const uint32_t& buffer_size);
@@ -143,6 +156,8 @@ class Sampler
     void begin(const uint32_t& buffer_size,const uint32_t& max_buffer_size=ADC_BUFFER_DEF);
 
     void parse_data(ADCOutput* _output,const uint32_t& _adcs);
+
+    void round_robin(ADCOutput* _output,const uint32_t& _adcs);
 
     void start();
 
