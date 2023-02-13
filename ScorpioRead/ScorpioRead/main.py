@@ -28,14 +28,17 @@ AMPLITUDE=3.3
 
 MAX_RESOLUTION=4095
 
+SAMP_FREQ=20000.0
+
 class Channel:
     def __init__(self,ax):
         self._buffer=np.array([],np.float32)
         self._ax=ax
-        self._points,=ax.plot([0],[0])
+        self._points,=ax.plot(np.arange(0,BUFFER_SIZE*(1/SAMP_FREQ),1/SAMP_FREQ),np.zeros(4096))
     
     def apppend(self,byte):
         if self._buffer.size>=BUFFER_SIZE:
+            
             self._buffer=np.append([])
             return
 
@@ -43,8 +46,11 @@ class Channel:
 
         self._buffer=np.append(self._buffer,sample)
 
+        self.update()
+
+
     def update(self):
-            self._points.set_data(np.arange(0,self._buffer.size),self._buffer)
+            self._points.set_data(np.arange(0,self._buffer.size*(1/SAMP_FREQ),1/SAMP_FREQ),self._buffer)
 
 
 figure=pyplot.figure()
@@ -73,16 +79,15 @@ def render_figure(fig):
 
 
 def recive_callback(value: bytes):
-    global curr_channel
-    if chr(value[0])=='c':
-        curr_channel=int(chr(value[1]))
-    else:
-        try:
-            print(int(value[0:len(value)-2]))
-            channels[curr_channel].apppend(int(value[0:len(value)-2]))
-            
-        except:
-            pass
+    line=value.decode()
+    
+    try:
+        (channel,value)=line.split(':')
+        channels[int(channel)].apppend(int(value))
+    except:
+        pass
+
+    
 
 async def ble_main():
 
