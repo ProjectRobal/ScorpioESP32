@@ -26,31 +26,32 @@ BUFFER_SIZE=4096
 
 AMPLITUDE=3.3
 
-MAX_RESOLUTION=4095
+MAX_RESOLUTION=4095.0
 
 SAMP_FREQ=20000.0
 
 class Channel:
     def __init__(self,ax):
         self._buffer=np.array([],np.float32)
+        self._buffer=np.zeros(BUFFER_SIZE,np.float32)
+        self._buffer[0]=MAX_RESOLUTION
+        self._x=np.arange(0,BUFFER_SIZE*(1/SAMP_FREQ),1/SAMP_FREQ)
         self._ax=ax
-        self._points,=ax.plot(np.arange(0,BUFFER_SIZE*(1/SAMP_FREQ),1/SAMP_FREQ),np.zeros(4096))
+        self._ax.autoscale(enable=True,axis='y')
+        self._points,=ax.plot(self._x,self._buffer)
     
     def apppend(self,byte):
-        if self._buffer.size>=BUFFER_SIZE:
-            
-            self._buffer=np.append([])
-            return
 
-        sample=(byte/MAX_RESOLUTION)*AMPLITUDE
-
-        self._buffer=np.append(self._buffer,sample)
+        #sample=(byte/MAX_RESOLUTION)*AMPLITUDE
+        print(byte)
+        self._buffer=np.roll(self._buffer,-1)
+        self._buffer[-1]=byte
 
         self.update()
 
 
     def update(self):
-            self._points.set_data(np.arange(0,self._buffer.size*(1/SAMP_FREQ),1/SAMP_FREQ),self._buffer)
+            self._points.set_data(self._x,self._buffer)
 
 
 figure=pyplot.figure()
@@ -79,9 +80,9 @@ def render_figure(fig):
 
 
 def recive_callback(value: bytes):
-    line=value.decode()
     
     try:
+        line=value.decode()
         (channel,value)=line.split(':')
         channels[int(channel)].apppend(int(value))
     except:
@@ -122,6 +123,8 @@ async def ble_main():
 
 async def main():
 
+    pyplot.autoscale(enable=True,axis='y')
+
     ser=serial.Serial(SERIAL,BAUDRATE,timeout=1)
 
     pygame.init()
@@ -143,6 +146,7 @@ async def main():
         screen.blit(render_figure(figure),(0,0))
 
         pygame.display.flip()
+        #pyplot.pause(0.001)
 
     pygame.quit()
 

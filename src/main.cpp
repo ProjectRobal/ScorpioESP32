@@ -80,11 +80,11 @@ void loop()
   {
     if(outputs[c])
     {
-  debug->print("c");
-  debug->print(c);
-  debug->println();
+  
   for(uint16_t i=0;i<DATA_SIZE;++i)
   {
+  debug->print(c);
+  debug->print(":");
   debug->println(outputs[c].Data()[i]);
   }
     }
