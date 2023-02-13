@@ -8,6 +8,9 @@ import serial
 
 from matplotlib import pyplot
 from matplotlib.animation import FuncAnimation
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+import pygame
 
 TARGET="Scorpio"
 
@@ -29,7 +32,7 @@ class Channel:
     def __init__(self,ax):
         self._buffer=np.array([],np.float32)
         self._ax=ax
-        self._points,=ax.plot([],[])
+        self._points,=ax.plot([0],[0])
     
     def apppend(self,byte):
         if self._buffer.size>=BUFFER_SIZE:
@@ -40,7 +43,7 @@ class Channel:
 
         self._buffer=np.append(self._buffer,sample)
 
-    def update(self,fig):
+    def update(self):
             self._points.set_data(np.arange(0,self._buffer.size),self._buffer)
 
 
@@ -59,14 +62,24 @@ channels=[
 curr_channel=0
 
 
+def render_figure(fig):
+    pyplot.draw()
+    canvas = FigureCanvasAgg(fig)
+    canvas.draw()
+    renderer = canvas.get_renderer()
+    raw_data = renderer.tostring_rgb()
+    size = canvas.get_width_height()
+    return pygame.image.fromstring(raw_data, size, "RGB")
+
+
 def recive_callback(value: bytes):
     global curr_channel
     if chr(value[0])=='c':
         curr_channel=int(chr(value[1]))
     else:
         try:
-            print(int(value[0:len(value)-6]))
-            channels[curr_channel].apppend(int(value[0:len(value)-6]))
+            print(int(value[0:len(value)-2]))
+            channels[curr_channel].apppend(int(value[0:len(value)-2]))
             
         except:
             pass
@@ -102,28 +115,31 @@ async def ble_main():
         await ble.disconnect()
 
 
-def serial_loop():
-
-    global outputs
-    #pyplot.show(block=False)
-
-    with serial.Serial(SERIAL,BAUDRATE,timeout=1) as ser:
-        while True:
-            recive_callback(ser.readline())
-
-            for channel in channels:
-                channel.update(figure)
-            
-            #pyplot.draw()
-            pyplot.pause(0.001)
-
-        
-
 async def main():
 
-    pyplot.show()
+    ser=serial.Serial(SERIAL,BAUDRATE,timeout=1)
 
-    serial_loop()
+    pygame.init()
+
+    screen = pygame.display.set_mode((800, 600))
+
+    #pyplot.show()
+    running = True
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        recive_callback(ser.readline())
+    
+        screen.fill((0, 0, 0))
+
+        screen.blit(render_figure(figure),(0,0))
+
+        pygame.display.flip()
+
+    pygame.quit()
 
 if __name__ == "__main__":
     asyncio.run(main())
