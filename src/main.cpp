@@ -2,58 +2,60 @@
 
 #include "Sampler.hpp"
 
-#define CH0 6 // ADC1 CH0
-#define CH1 4 // ADC1 CH3
-#define CH2 5 // ADC1 CH6
+#define CH0 0 // ADC1 CH0
+#define CH1 3 // ADC1 CH3
+#define CH2 6 // ADC1 CH6
 
-#define DATA_SIZE 256
+#define DATA_SIZE 4096
 
-Sampler sampler;
+#define BUFFER_SIZE 1024
 
-ADCOutput output[3]={
+ADCOutput outputs[3]={
   ADCOutput(CH0,DATA_SIZE),
   ADCOutput(CH1,DATA_SIZE),
   ADCOutput(CH2,DATA_SIZE)
 };
 
-void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(115200);
+Sampler sampler;
 
-  sampler.setADCChannel(output[0]);
-  sampler.setADCChannel(output[1]);
-  sampler.setADCChannel(output[2]);
+void setup()
+{
+Serial.begin(115200);
 
-  sampler.setSampleFreq(44000);
+dacWrite(25,127);
+dacWrite(26,50);
 
-  sampler.begin(256);
+  for(const ADCOutput& out : outputs)
+  {
 
-  sampler.start(); 
-}
+  sampler.setADCChannel(out);
 
-void loop() {
-  // put your main code here, to run repeatedly:
-
-  sampler.parse_data(output,3);
-
-  
-    if(output[2])
-    {
-      
-      const uint16_t *out=output[2].Data();
-      Serial.print("Channel ");
-      Serial.print(2);
-      
-      for(uint16_t o=0;o<DATA_SIZE;++o)
-      {
-               
-        Serial.print(" ");
-        Serial.print(out[o]);
-        
-      }
-    
   }
 
-  delay(250);
+  sampler.setSampleFreq(60*1000);
+
+  sampler.begin(BUFFER_SIZE,BUFFER_SIZE*10);
+
+  sampler.start();
+}
+
+void loop()
+{
+  sampler.parse_data(outputs,3);
+
+  for(uint16_t c=0;c<3;c++)
+  {
+    if(outputs[c])
+    {
+  Serial.print("c");
+  Serial.print(c);
+  Serial.println();
+  for(uint16_t i=0;i<DATA_SIZE;++i)
+  {
+  Serial.println(outputs[c].Data()[i]);
+  }
+  Serial.println();
+    }
+  }
 
 }

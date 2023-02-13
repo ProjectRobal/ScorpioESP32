@@ -28,7 +28,7 @@ uint16_t Sampler::count_channels(uint16_t mask)
 
 void Sampler::_init_adc_dma(const uint32_t& buffer_size,const uint32_t& max_buffer_size)
     {
-        adc_digi_init_config_s config;
+        
         config.max_store_buf_size=max_buffer_size;
         config.conv_num_each_intr=buffer_size;
         config.adc1_chan_mask=adc1_channels;
@@ -38,6 +38,29 @@ void Sampler::_init_adc_dma(const uint32_t& buffer_size,const uint32_t& max_buff
         _init_buffer(buffer_size);
     }
 
+void Sampler::_init_adc_channel(const ADCOutput& adc)
+{
+        config.adc1_chan_mask=0;
+        config.adc2_chan_mask=0;
+
+        switch(adc.unit)
+        {
+            case ADC1:
+
+            config.adc1_chan_mask=(1<<adc.channel);
+
+            break;
+
+            case ADC2:
+
+            config.adc2_chan_mask=(1<<adc.channel);
+
+            break;
+        }
+
+        adc_digi_initialize(&config);
+}
+
 void Sampler::_init_adc_controller_cfg()
 {
     adc_digi_configuration_t config;
@@ -45,7 +68,7 @@ void Sampler::_init_adc_controller_cfg()
     config.conv_limit_num=ADC_CONV_LIMIT_EN;
     config.format=ADC_OUTPUT_TYPE;
     config.sample_freq_hz=sample_freq;
-    config.conv_limit_num=250;
+    config.conv_limit_num=255;
 
     uint16_t channels_number=0;
 
@@ -92,6 +115,9 @@ void Sampler::_init_adc_controller_cfg()
     #endif
 
     config.pattern_num=channels_number;
+
+    Serial.println("Total channels: ");
+    Serial.println(channels_number);
 
     adc_digi_pattern_config_t patterns[channels_number];
 
@@ -215,6 +241,7 @@ Sampler::Sampler()
 
 void Sampler::parse_data(ADCOutput* _output,const uint32_t& _adcs)
     {
+    
     uint32_t readed=0;
     adc_digi_read_bytes(buffer_out,buffer_size,&readed,TIMEOUT);
     uint8_t a;

@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "Scorpio",
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"random": "cpp"
+		}
+	}
+}
