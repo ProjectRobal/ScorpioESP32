@@ -3,3 +3,9 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+
+ScorpioRead/bin
+ScorpioRead/include
+ScorpioRead/lib/*
+ScorpioRead/lib64
+ScorpioRead/pyvenv.cfg

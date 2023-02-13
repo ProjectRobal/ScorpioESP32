@@ -2,6 +2,10 @@
 
 #include "Sampler.hpp"
 
+#include "BluetoothSerial.h"
+
+//#define DEBUG
+
 #define CH0 0 // ADC1 CH0
 #define CH1 3 // ADC1 CH3
 #define CH2 6 // ADC1 CH6
@@ -18,9 +22,29 @@ ADCOutput outputs[3]={
 
 Sampler sampler;
 
+#ifdef DEBUG
+
+BluetoothSerial BSerial;
+
+#endif
+
+Print *debug;
+
 void setup()
 {
 Serial.begin(115200);
+
+#ifdef DEBUG
+
+BSerial.begin("Scorpio");
+
+debug=&BSerial;
+
+#else
+
+debug=&Serial;
+
+#endif
 
 dacWrite(25,127);
 dacWrite(26,50);
@@ -43,18 +67,26 @@ void loop()
 {
   sampler.parse_data(outputs,3);
 
+  #ifdef DEBUG
+
+  if(!BSerial.connected())
+  {
+    return;
+  }
+
+  #endif
+
   for(uint16_t c=0;c<3;c++)
   {
     if(outputs[c])
     {
-  Serial.print("c");
-  Serial.print(c);
-  Serial.println();
+  debug->print("c");
+  debug->print(c);
+  debug->println();
   for(uint16_t i=0;i<DATA_SIZE;++i)
   {
-  Serial.println(outputs[c].Data()[i]);
+  debug->println(outputs[c].Data()[i]);
   }
-  Serial.println();
     }
   }
 
