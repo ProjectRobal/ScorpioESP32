@@ -68,7 +68,7 @@ void Sampler::_init_adc_controller_cfg()
     config.conv_limit_num=ADC_CONV_LIMIT_EN;
     config.format=ADC_OUTPUT_TYPE;
     config.sample_freq_hz=sample_freq;
-    config.conv_limit_num=250;
+    config.conv_limit_num=255;
 
     uint16_t channels_number=0;
 
@@ -115,6 +115,9 @@ void Sampler::_init_adc_controller_cfg()
     #endif
 
     config.pattern_num=channels_number;
+
+    Serial.println("Total channels: ");
+    Serial.println(channels_number);
 
     adc_digi_pattern_config_t patterns[channels_number];
 
@@ -235,28 +238,6 @@ Sampler::Sampler()
         adc_mode=ADC_CONV_SINGLE_UNIT_1;
     }
 
-void Sampler::round_robin(ADCOutput* _output,const uint32_t& _adcs)
-{
-    uint32_t readed=0;
-
-    for(uint8_t a=0;a<_adcs;++a)
-    {
-        _init_adc_channel(_output[a]);
-
-        adc_digi_read_bytes(buffer_out,buffer_size,&readed,TIMEOUT);
-
-    for(uint32_t i=0;i<readed;i+=ADC_RESULT_BYTE)
-    {
-        adc_digi_output_data_t *p = (adc_digi_output_data_t*)&buffer_out[i];
-
-            #if ADC_CONV_MODE==ADC_DIGI_OUTPUT_FORMAT_TYPE1
-            _output[a].AppendData(p->type1.data,p->type1.channel,0);
-            #else
-            _output[a].AppendData(p->type2.data,p->type2.channel,p->type2.unit);
-            #endif
-    }
-    }
-}
 
 void Sampler::parse_data(ADCOutput* _output,const uint32_t& _adcs)
     {

@@ -157,8 +157,6 @@ class Sampler
 
     void parse_data(ADCOutput* _output,const uint32_t& _adcs);
 
-    void round_robin(ADCOutput* _output,const uint32_t& _adcs);
-
     void start();
 
     void stop();
