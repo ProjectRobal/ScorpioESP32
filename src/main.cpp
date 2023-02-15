@@ -1,10 +1,18 @@
+//#define DEBUG
+
 #include <Arduino.h>
 
 #include "Sampler.hpp"
 
+#include "FFTOutput.hpp"
+
+
+#ifdef DEBUG
+
 #include "BluetoothSerial.h"
 
-//#define DEBUG
+#endif
+
 
 #define CH0 0 // ADC1 CH0
 #define CH1 3 // ADC1 CH3
@@ -14,10 +22,10 @@
 
 #define BUFFER_SIZE 1024
 
-ADCOutput outputs[3]={
-  ADCOutput(CH0,DATA_SIZE),
-  ADCOutput(CH1,DATA_SIZE),
-  ADCOutput(CH2,DATA_SIZE)
+FFTOutput outputs[3]={
+  FFTOutput(CH0,DATA_SIZE),
+  FFTOutput(CH1,DATA_SIZE),
+  FFTOutput(CH2,DATA_SIZE)
 };
 
 Sampler sampler;
