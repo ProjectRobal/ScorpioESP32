@@ -75,6 +75,16 @@ void loop()
 {
   sampler.parse_data(outputs,3);
 
+
+  /*if(outputs[0])
+  {
+    for(uint32_t i=0;i<100;++i)
+    {
+      Serial.print(outputs[0].Data()[i]);
+      Serial.print(" ");
+    }
+  }*/
+
   for(Signal& sig : signals)
   {
     sig.loop();
@@ -89,5 +99,5 @@ void loop()
     Serial.println(kebab[i]);
   }
 
-  delay(250);
+  delay(50);
 }
