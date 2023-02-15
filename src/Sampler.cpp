@@ -210,7 +210,7 @@ void Sampler::setADCChannel(ADC_DEVICE dev,uint16_t channel)
         }
     }
 
-void Sampler::setADCChannel(ADCOutput out)
+void Sampler::setADCChannel(const ADCOutput& out)
 {
     setADCChannel(static_cast<ADC_DEVICE>(out.unit),out.channel);
 }

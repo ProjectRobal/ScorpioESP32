@@ -105,13 +105,14 @@ class ADCOutput
         return ptr>=_size;
     }
 
-    ~ADCOutput()
+    virtual ~ADCOutput()
     {
         delete [] data;
     }
 
     friend class Sampler;
 };
+
 
 class Sampler
 {
@@ -167,7 +168,7 @@ class Sampler
 
     void setADCChannel(ADC_DEVICE dev,uint16_t channel);
 
-    void setADCChannel(ADCOutput out);
+    void setADCChannel(const ADCOutput& out);
 
     const uint32_t& BufferSize() const
     {
