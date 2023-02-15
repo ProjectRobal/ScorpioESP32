@@ -7,20 +7,14 @@
 #include "FFTOutput.hpp"
 
 
-#ifdef DEBUG
-
-#include "BluetoothSerial.h"
-
-#endif
-
 
 #define CH0 0 // ADC1 CH0
 #define CH1 3 // ADC1 CH3
 #define CH2 6 // ADC1 CH6
 
-#define DATA_SIZE 4096
+#define DATA_SIZE 2048
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 256
 
 FFTOutput outputs[3]={
   FFTOutput(CH0,DATA_SIZE),
@@ -30,29 +24,9 @@ FFTOutput outputs[3]={
 
 Sampler sampler;
 
-#ifdef DEBUG
-
-BluetoothSerial BSerial;
-
-#endif
-
-Print *debug;
-
 void setup()
 {
 Serial.begin(115200);
-
-#ifdef DEBUG
-
-BSerial.begin("Scorpio");
-
-debug=&BSerial;
-
-#else
-
-debug=&Serial;
-
-#endif
 
 dacWrite(25,127);
 dacWrite(26,50);
@@ -71,31 +45,16 @@ dacWrite(26,50);
   sampler.start();
 }
 
+
 void loop()
 {
   sampler.parse_data(outputs,3);
 
-  #ifdef DEBUG
-
-  if(!BSerial.connected())
+  if(outputs[0].FFT())
   {
-    return;
-  }
+    Serial.print("");
+    Serial.println(outputs[0].GetFFT()[10]);
+  } 
 
-  #endif
-
-  for(uint16_t c=0;c<3;c++)
-  {
-    if(outputs[c])
-    {
-  
-  for(uint16_t i=0;i<DATA_SIZE;++i)
-  {
-  debug->print(c);
-  debug->print(":");
-  debug->println(outputs[c].Data()[i]);
-  }
-    }
-  }
-
+  delay(250);
 }

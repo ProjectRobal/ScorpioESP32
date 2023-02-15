@@ -21,22 +21,63 @@ class FFTOutput : public ADCOutput
         fft=fft_init(this->Size(),FFT_REAL,FFT_FORWARD,NULL,NULL);        
     }
 
-    const float* FFT()
+
+    /**
+     * @brief FFT loop function
+     * 
+     * A function that make fft when data are ready.
+     * 
+     * @return true - when data is ready, otherwise return false
+    */
+
+    bool FFT()
     {
         if(this->operator bool())
         {
+            uint32_t i;
+
             const uint16_t * raw=this->Data();
 
-            for(uint32_t i=0;i<this->Size();++i)
+            for(i=0;i<this->Size();++i)
             {
                 this->fft->input[i]=static_cast<float>(raw[i]);
             }
 
             fft_execute(this->fft);
 
-            return this->fft->output;
+            for(i=1;i<this->Size()/2;++i)
+            {
+
+                float mag=sqrt(pow(fft->output[2*i],2) + pow(fft->output[2*i+1],2))/1;
+
+                this->fft->output[i]=mag;
+            }
+
+            return true;
         }
 
+        return false;
+    }
+
+    /** @brief Get fft output
+     * 
+     *  @return float array with fft's output
+    */
+    const float * GetFFT()
+    {
+        return this->fft->output;
+    }
+
+    /** @brief Interept index as frequency
+     * 
+     * @param i - index
+     * @param sample_freq - a signal sample freq
+     * 
+     *  @return frequency corrensponding to input index
+    */
+    float IndexToFrequency(const uint32_t& i,const float& sample_freq)
+    {
+        return (static_cast<float>(i)*sample_freq)/this->Size();
     }
 
     ~FFTOutput()
