@@ -41,6 +41,10 @@ enum ADC_DEVICE
     ADC2=1
 };
 
+/** @brief A class that represents each adc channel 
+ * 
+ * 
+*/
 class ADCOutput
 {
     private:

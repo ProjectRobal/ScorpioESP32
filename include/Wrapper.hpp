@@ -1,3 +1,8 @@
+/** @brief A class that wraps all the inputs from Signal objects all together.
+ *  
+ * It gives outputs that represents amplitude reading from all sensors.
+*/
+
 #pragma once
 
 #include "Signal.hpp"

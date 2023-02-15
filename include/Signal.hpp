@@ -1,3 +1,9 @@
+/** A class that collect data and perfrom FFT on it by FFTOutput object,
+ * then it stores index of biggest value in FFT output.
+ * 
+ * 
+*/
+
 #pragma once
 
 #include "FFTOutput.hpp"

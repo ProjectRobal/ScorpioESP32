@@ -1,3 +1,6 @@
+/** @brief A class that is child of ADCOutput class, it perform the same task plus fft transform. 
+ * 
+*/
 #pragma once
 
 extern "C"
