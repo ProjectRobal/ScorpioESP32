@@ -84,16 +84,13 @@ void loop()
 
   if(kebab)
   {
-
+  //header
+  Serial.println("abc");
   for(uint16_t i=0;i<kebab.size();++i)
   {
-    Serial.print(i);
-    Serial.print(" : ");
+    //data from each channels
     Serial.println(kebab[i]);
   }
-
-  delay(50);
-
   kebab.reset();
   }
 }
