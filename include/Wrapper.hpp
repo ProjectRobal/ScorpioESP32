@@ -54,9 +54,9 @@ class Wrapper
             //Serial.println(i);
         }
 
-        isReady=true;
-
         uint32_t index=the_signal_with_biggest_value();
+
+        index=signals[index].GetIndex();
 
         for(uint16_t i=0;i<Size;++i)
         {
@@ -69,6 +69,8 @@ class Wrapper
         {
             signals[i].reset();
         }
+
+        isReady=true;
 
     }
 

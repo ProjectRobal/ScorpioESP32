@@ -49,6 +49,13 @@ Sampler sampler;
 
 Wrapper<3> kebab(signals);
 
+void harvest(void* arg=NULL)
+{
+  sampler.parse_data(outputs,3);
+}
+
+TaskHandle_t harvestTask = NULL;
+
 void setup()
 {
 Serial.begin(115200);
@@ -66,13 +73,15 @@ Serial.begin(115200);
   sampler.begin(BUFFER_SIZE,BUFFER_SIZE*10);
 
   sampler.start();
+
+  //xTaskCreatePinnedToCore(harvest,"harvest",4096,NULL,10,&harvestTask,!xPortGetCoreID());
 }
 
 //volatile uint32_t last_time=0;
 
 void loop()
 {
-  sampler.parse_data(outputs,3);
+  harvest();
 
   for(Signal& sig : signals)
   {
@@ -88,9 +97,9 @@ void loop()
   for(uint16_t i=0;i<kebab.size();++i)
   {
     //data from each channels
-    Serial.println(kebab[i]);
+    Serial.println(kebab[i],4);
   }
-  //Serial.print("Time: ");
+  //Serial.print("Time: ");s
   //Serial.println(millis()-last_time);
   //last_time=millis();
   kebab.reset();

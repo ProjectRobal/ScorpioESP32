@@ -24,6 +24,21 @@ class FFTOutput : public ADCOutput
         fft=fft_init(this->Size(),FFT_REAL,FFT_FORWARD,NULL,NULL);        
     }
 
+    float filter(float mag)
+    {
+        if(isnan(mag))
+        {
+            return 0;
+        }
+
+        if(mag<2500.0)
+        {
+            return mag;
+        }
+
+        return 0;
+    }
+
 
     /**
      * @brief FFT loop function
@@ -52,11 +67,13 @@ class FFTOutput : public ADCOutput
             for(i=1;i<this->Size()/2;++i)
             {
 
-                float mag=sqrt(pow(fft->output[2*i],2) + pow(fft->output[2*i+1],2));
+                float mag=(pow(fft->output[2*i],2) + pow(fft->output[2*i+1],2))/(this->Size()/2);
 
-                this->fft->output[i]=mag;
+                this->fft->output[i]=mag;//filter(mag);
                 
             }
+
+            this->flush();
 
             return true;
         }

@@ -101,8 +101,13 @@ class ADCOutput
 
     const uint16_t* Data()
     {
-        ptr=0;
+        //ptr=0;
         return data;
+    }
+
+    void flush()
+    {
+        ptr=0;
     }
 
     operator bool()

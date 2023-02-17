@@ -54,7 +54,7 @@ class Signal
 
         if(fft->FFT())
         {
-            index=max(fft->GetFFT(),fft->Size()/2);
+            index=max(fft->GetFFT(),fft->Size()/4);
 
             isReady=true;
         }
