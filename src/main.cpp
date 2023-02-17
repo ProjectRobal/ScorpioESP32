@@ -53,8 +53,6 @@ void setup()
 {
 Serial.begin(115200);
 
-dacWrite(25,127);
-dacWrite(26,50);
 
   for(ADCOutput* out : outputs)
   {
@@ -70,6 +68,7 @@ dacWrite(26,50);
   sampler.start();
 }
 
+//volatile uint32_t last_time=0;
 
 void loop()
 {
@@ -91,6 +90,9 @@ void loop()
     //data from each channels
     Serial.println(kebab[i]);
   }
+  //Serial.print("Time: ");
+  //Serial.println(millis()-last_time);
+  //last_time=millis();
   kebab.reset();
   }
 }
