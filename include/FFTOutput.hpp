@@ -67,7 +67,7 @@ class FFTOutput : public ADCOutput
             for(i=1;i<this->Size()/2;++i)
             {
 
-                float mag=(pow(fft->output[2*i],2) + pow(fft->output[2*i+1],2))/(this->Size()/2);
+                float mag=sqrt(pow(fft->output[2*i],2) + pow(fft->output[2*i+1],2))/(this->Size()/2);
 
                 this->fft->output[i]=mag;//filter(mag);
                 
