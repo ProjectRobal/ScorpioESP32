@@ -239,7 +239,7 @@ Sampler::Sampler()
     }
 
 
-void Sampler::parse_data(ADCOutput* _output,const uint32_t& _adcs)
+void Sampler::parse_data(ADCOutput** _output,const uint32_t& _adcs)
     {
     
     uint32_t readed=0;
@@ -253,9 +253,9 @@ void Sampler::parse_data(ADCOutput* _output,const uint32_t& _adcs)
         for(a=0;a<_adcs;++a)
         {
             #if ADC_CONV_MODE==ADC_DIGI_OUTPUT_FORMAT_TYPE1
-            _output[a].AppendData(p->type1.data,p->type1.channel,0);
+            _output[a]->AppendData(p->type1.data,p->type1.channel,0);
             #else
-            _output[a].AppendData(p->type2.data,p->type2.channel,p->type2.unit);
+            _output[a]->AppendData(p->type2.data,p->type2.channel,p->type2.unit);
             #endif
         }   
     }

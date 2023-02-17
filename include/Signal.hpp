@@ -41,7 +41,8 @@ class Signal
     Signal(FFTOutput *_fft)
     : fft(_fft)
     {
-
+        isReady=false;
+        index=0;
     }
 
     void loop()
@@ -72,6 +73,11 @@ class Signal
     const float& GetValue()
     {
         return fft->GetFFT()[index];
+    }
+
+    void reset()
+    {
+        isReady=false;
     }
 
     operator bool()

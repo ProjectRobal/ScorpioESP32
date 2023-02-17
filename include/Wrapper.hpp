@@ -17,6 +17,8 @@ class Wrapper
     
     float outputs[Size];
 
+    bool isReady;
+
     uint32_t the_signal_with_biggest_value()
     {
         uint32_t index=0;
@@ -37,6 +39,7 @@ class Wrapper
     Wrapper(Signal *_signals)
     {
         signals=_signals;
+        isReady=false;
     }
 
     void loop()
@@ -47,7 +50,11 @@ class Wrapper
             {
                 return;
             }
+            //Serial.print("Signal ready ");
+            //Serial.println(i);
         }
+
+        isReady=true;
 
         uint32_t index=the_signal_with_biggest_value();
 
@@ -57,6 +64,22 @@ class Wrapper
             outputs[i]=signals[i].GetValue(index);
 
         }
+
+        for(uint16_t i=0;i<Size;++i)
+        {
+            signals[i].reset();
+        }
+
+    }
+
+    operator bool()
+    {
+        return isReady;
+    }
+
+    void reset()
+    {
+        isReady=false;
     }
 
     const float& GetOutput(uint16_t index)

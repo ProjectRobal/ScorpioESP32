@@ -47,7 +47,7 @@ enum ADC_DEVICE
 */
 class ADCOutput
 {
-    private:
+    protected:
 
     uint8_t channel;
 
@@ -86,6 +86,7 @@ class ADCOutput
 
     void AppendData(const uint16_t& sample,const uint8_t& _channel,const uint8_t& _unit)
     {
+
         if((_channel!=channel)||(unit!=_unit))
         {
             return;
@@ -160,7 +161,7 @@ class Sampler
     
     void begin(const uint32_t& buffer_size,const uint32_t& max_buffer_size=ADC_BUFFER_DEF);
 
-    void parse_data(ADCOutput* _output,const uint32_t& _adcs);
+    void parse_data(ADCOutput** _output,const uint32_t& _adcs);
 
     void start();
 

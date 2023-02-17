@@ -32,16 +32,16 @@
 #define BUFFER_SIZE 256
 
 
-FFTOutput outputs[3]={
-  FFTOutput(CH0,DATA_SIZE),
-  FFTOutput(CH1,DATA_SIZE),
-  FFTOutput(CH2,DATA_SIZE)
+ADCOutput* outputs[3]={
+  new FFTOutput(CH0,DATA_SIZE),
+  new FFTOutput(CH1,DATA_SIZE),
+  new FFTOutput(CH2,DATA_SIZE)
 };
 
 Signal signals[3]={
-  Signal(&(outputs[0])),
-  Signal(&(outputs[1])),
-  Signal(&(outputs[2]))
+  Signal((FFTOutput*)outputs[0]),
+  Signal((FFTOutput*)outputs[1]),
+  Signal((FFTOutput*)outputs[2])
 };
 
 Sampler sampler;
@@ -56,10 +56,10 @@ Serial.begin(115200);
 dacWrite(25,127);
 dacWrite(26,50);
 
-  for(const ADCOutput& out : outputs)
+  for(ADCOutput* out : outputs)
   {
 
-  sampler.setADCChannel(out);
+  sampler.setADCChannel(*out);
 
   }
 
@@ -75,22 +75,15 @@ void loop()
 {
   sampler.parse_data(outputs,3);
 
-
-  /*if(outputs[0])
-  {
-    for(uint32_t i=0;i<100;++i)
-    {
-      Serial.print(outputs[0].Data()[i]);
-      Serial.print(" ");
-    }
-  }*/
-
   for(Signal& sig : signals)
   {
     sig.loop();
   }
 
   kebab.loop();
+
+  if(kebab)
+  {
 
   for(uint16_t i=0;i<kebab.size();++i)
   {
@@ -100,4 +93,7 @@ void loop()
   }
 
   delay(50);
+
+  kebab.reset();
+  }
 }
